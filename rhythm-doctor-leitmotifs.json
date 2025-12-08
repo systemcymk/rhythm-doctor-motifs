@@ -7,8 +7,42 @@
 
     "id": "rhythmdoctor",
     "dependencies": [""],
+    "priority": 0,
 
-    "trackData": {
+    "styles": {
+        "default": {
+            "color": "#c1b448",
+            "outline": "#000000",
+            "radius": 15,
+            "sides": 3
+        },
+
+        "leitmotif": {
+            "color": "#ff0d40",
+            "radius": 20,
+            "sides": 5
+        },
+        "subtrack": {
+            "sides": 4
+        },
+        "medley": {
+            "color": "#5421a6",
+            "sides": 3.2
+        },
+
+        "minor": {
+            "color": "#9797b3"
+        },
+        "isolate": {
+            "color": "#9797b3"
+        },
+
+        "external": {
+            "color": "#9797b3"
+        }
+    },
+
+    "tracks": {
         "1-1": "Samurai Techno",
         "1-1N": "Samurai Dubstep",
         "1-2": "Intimate",
@@ -24,6 +58,7 @@
         "2-3N": "Bomb-Sniffing Pomeranian",
         "2-4": "Song of the Sea",
         "2-X": "All The Times",
+        "2-XN": "Bitter Times",
         "2-B1": "Beans Hopper",
 
         "3-1": "Sleepy Garden",
@@ -45,7 +80,33 @@
         "5-2": "Lo-Fi Beats For Patients To Chill To",
         "5-2N": "Unsustainable Inconsolable",
         "5-3": "Seventh Inning Stretch",
+        "5-3N": "Corazones Viejos",
         "5-X": "Dreams Don't Stop",
+
+        "6-1": "Something To Tell You",
+        "6-2": "Welcome Back",
+        "6-X": "Boss Fight",
+
+        "7-2": "Blurred",
+        "7-X": {
+            "name": "Miracle Defibrillator",
+            "leitmotifs": {
+                "1-1": [],
+                "1-2": [],
+                "2-1": [],
+                "3-X": [],
+                "2-2N": [],
+                "2-3": [],
+                "2-X": [],
+                "1-X": [],
+                "3-3": [],
+                "3-1": [],
+                "3-2": [],
+                "2-2": [],
+                "3-1N": [],
+                "4-1": []
+            }
+        },
 
         "X-1": "Art Exercise",
         "X-0": "Helping Hands",
@@ -91,6 +152,7 @@
         "5-IN_FINALE": {
             "name": "Dreams Don't Stop",
             "subtitle": "(Intermission)",
+            "isMinor": true,
             "embeds": {
                 "files": [
                 ]
@@ -180,7 +242,8 @@
             "subtitle": "Edega",
             "associations": [
                 "5-IN_Edega",
-                "5-IN_FINALE"
+                "5-IN_FINALE",
+                "6-X"
             ]
         },
         "dreamsdontstop": {
@@ -192,6 +255,7 @@
         },
         "bomb": {
             "name": "Artificial Intelligence Bomb",
+            "style": "external",
             "associations": [
                 "2-3N"
             ]

@@ -49,47 +49,63 @@ function trackName(data) {
     return data.name
 }
 
+function removeFrom(table, value) {
+    const index = table.indexOf(value);
+    if (index >= 0) table.splice(index, 1);
+    return table;
+}
+
 function createTrees(newData) {
     mergeData(data, newData);
-    const isolates = Object.keys(newData.trackData);
+    const medleys = {}
 
-    const seenTracks = [];
+    const isolates = Object.keys(newData.tracks);
+
+    // Handle ball creation.
+    Object.entries(newData.tracks).forEach(([id, track]) => {
+        balls[id] = new node(id, track.name ?? track);
+        balls[id].resetStyle();
+
+        if (track.subtitle) balls[id].subtitle = track.subtitle
+        if (track.leitmotifs) medleys[id] = track.leitmotifs
+    });
+
+    // Handle leitmotif connections.
     Object.entries(newData.leitmotifs).forEach(([motif, subdata]) => {
         // Here we handle motif coalescing -
         // if a motif is primarily found in one track, then we consider the motif to be the track itself.
         const motifID = subdata.id ??= motif;
-        balls[motifID] = new node(motifID, subdata.name ??= trackName(data.trackData[motifID]), 20, LEITMOTIF_COLOR);
-        ballsMotifs[motif] = balls[motifID];
+        if (motifID == motif) balls[motifID] = new node(motifID, subdata.name);
+        if (subdata.subtitle) balls[motifID].subtitle = subdata.subtitle
+        removeFrom(isolates, motifID);
 
-        if (motifID != motif) {
-            if (data.trackData[motifID].subtitle) balls[motifID].subtitle = data.trackData[motifID].subtitle;
-            balls[motifID].color = LEITMOTIF_TRACK_COLOR;
-            balls[motifID].sides = 5;
-        }
+        const curBall = balls[motifID];
+        ballsMotifs[motif] = curBall;
+        curBall.applyStyle("leitmotif");
+        if (subdata.style) curBall.applyStyle(subdata.style);
 
-        seenTracks.push(motifID);
-        isolates.splice(isolates.indexOf(motifID), 1);
-        if (subdata.subtitle) balls[motifID].subtitle = subdata.subtitle;
-
-        subdata.associations.forEach(track => {
-            // Don't do redundant handling.
-            if (!seenTracks.includes(track)) {
-                balls[track] = new node(track, data.trackData[track].name ?? data.trackData[track], 15, TRACK_COLOR)
-                if (data.trackData[track].subtitle) balls[track].subtitle = data.trackData[track].subtitle;
-                if (data.trackData[track].isMinor) balls[track].color = MINOR_TRACK_COLOR;
-                balls[track].sides = 3;
-
-                seenTracks.push(track);
-                isolates.splice(isolates.indexOf(track), 1);
-            }
-
-            balls[motifID].children.push(balls[track]);
-            balls[track].parents.push(balls[motifID]);
+        subdata.associations.forEach(id => {
+            curBall.addChild(balls[id]);
+            removeFrom(isolates, id);
         });
     });
 
-    isolates.forEach(orphan => {
-        balls[orphan] = new node(orphan, data.trackData[orphan].name ?? data.trackData[orphan], 15, ISOLATE_COLOR)
+    // Handle medley styles and connections.
+    Object.entries(medleys).forEach(([track, motifs]) => {
+        const curBall = balls[track];
+        if (Object.keys(motifs).length > 3) curBall.applyStyle("medley");
+        removeFrom(isolates, track);
+
+        Object.entries(motifs).forEach(([motif, subdata]) => {
+            balls[motif].addChild(curBall);
+            removeFrom(isolates, motif);
+        });
+    });
+
+    Object.entries(newData.tracks).forEach(([id, track]) => {
+        if (isolates.indexOf(id) >= 0) balls[id].applyStyle("isolate");
+        if (track.isMinor) balls[id].applyStyle("minor")
+        if (track.style) balls[id].applyStyle(track.style)
     });
 }
 
@@ -110,15 +126,15 @@ function pythagoras(dx, dy) {
     return (dx**2 + dy**2)**0.5;
 }
 
-SPRING_CONSTANT = 0.0025
-IDEAL = 125
-REPULSE_DISTANCE_MIN = 127
+SPRING_CONSTANT = 0.0015
+IDEAL = 100
+REPULSE_DISTANCE_MIN = 256
 PERMITTIVITY = 250
-FRICTION = 0.15
-GRAVITY = 0.0005
+FRICTION = 0.1
+GRAVITY = 0.00025
 
 class node {
-    parents = [];
+    motifs = [];
     children = [];
     isEnabled = true;
 
@@ -126,21 +142,18 @@ class node {
     subtitle;
     dist = 0;
 
+    style;
+    color = "#000000"
+    outline = "#00000000"
+
     sides = 0;
     angle = 0;
 
-    vx = 0;
-    vy = 0;
-    ax = 0;
-    ay = 0;
-
-    constructor(id, name, radius, color, x, y) {
+    constructor(id, name, x, y) {
         this.x = x == undefined ? node.randomPosition() : x;
         this.y = y == undefined ? node.randomPosition() : y;
-        this.radius = radius
-        this.id = id
-        this.name = name || id
-        this.color = color
+        this.id = id;
+        this.name = name || id;
     }
 
     draw() {
@@ -152,6 +165,8 @@ class node {
         ctx.globalAlpha = node.bodyAlpha(this.dist);
         if (this.sides <= 0) node.drawBall(this);
         else node.drawPolygon(this);
+
+        ctx2.lineWidth = 4;
 
         ctx2.textAlign = "center"
         ctx2.font = `${16/zoom}px rhythmdoctor`
@@ -170,15 +185,24 @@ class node {
             ctx.fillStyle = "#7f7f7f";
             ctx.strokeStyle = "#000000";
 
+            ctx.lineWidth = 4;
+
             const textY = sy + (20.5 + this.radius * 2) / zoom;
             ctx.globalAlpha = ctx2.globalAlpha;
             ctx.strokeText(this.subtitle, sx, textY);
             ctx.fillText(this.subtitle, sx, textY);
         }
 
+        ctx.lineWidth = 1;
         ctx.globalAlpha = 1;
+        ctx2.lineWidth = 1;
         ctx2.globalAlpha = 1;
     }
+
+    vx = 0;
+    vy = 0;
+    ax = 0;
+    ay = 0;
 
     // Interacts with another ball, handling repulsion and spring physics.
     // If connected, also draws the edge between. Never called if the node is held.
@@ -188,11 +212,11 @@ class node {
             const dy = this.y - ball.y
             const dist = pythagoras(dx, dy)
 
-            const isChild = this.parents.includes(ball);
-            if (isChild) drawEdge(this.x, this.y, ball.x, ball.y, node.bodyAlpha(this.dist));
+            const isChild = this.motifs.includes(ball);
+            if (isChild) drawEdge(this.x, this.y, ball.x, ball.y, node.lineAlpha(this.dist));
 
             if (isChild || this.children.includes(ball)) {
-                let spring = Math.max(-1000, Math.min(1000, -SPRING_CONSTANT * (dist - IDEAL)))
+                let spring = Math.max(-2000, Math.min(2000, -SPRING_CONSTANT * (dist - IDEAL)))
                 this.ax += spring * dx / dist;
                 this.ay += spring * dy / dist;
             } else {
@@ -206,7 +230,7 @@ class node {
     // This is used ONLY when the node is dragged.                                                i was here :3c - systemcymk
     // Else, this is handled by interact(), for minor performance reasons.
     drawEdges() {
-        Object.entries(this.parents).forEach(([_, ball]) => {
+        Object.entries(this.motifs).forEach(([_, ball]) => {
             drawEdge(this.x, this.y, ball.x, ball.y, 1);
         });
     }
@@ -219,6 +243,35 @@ class node {
         this.angle += Math.min(25, pythagoras(this.vx, this.vy) * 0.125) * Math.sign(this.vx) * Math.sign(this.vy)
     }
 
+    // Quick function to add a child to this node.
+    // Remember that leitmotifs should be the parent of tracks.
+    addChild(ball) {
+        this.children.push(ball);
+        ball.motifs.push(this);
+
+        this.isolate = false;
+        ball.isolate = false;
+    }
+
+    // Force-applies the specified style to this node.
+    forceStyle(style) {
+        if (style) Object.entries(style).forEach(([property, value]) => {
+            this[property] = value;
+        });
+    }
+
+    // Apply the default style to this node.
+    resetStyle(id) {
+        this.forceStyle(data.styles.default);
+    }
+
+    // Apply the specified style (or the current style) to this node.
+    applyStyle(id) {
+        if (id) this.style = id;
+        const style = data.styles[this.style];
+        if (style) this.forceStyle(style);
+    }
+
     static bodyAlpha(dist) {
         return Math.max(0.5, Math.min(1, 500 / dist));
     }
@@ -227,13 +280,25 @@ class node {
         return Math.max(0.5, Math.min(1, Math.max(50 / dist + 0.5, 150 / dist - 1.5)));
     }
 
+    static lineAlpha(dist) {
+        return Math.max(0.5, Math.min(1, Math.max(25 / dist + 0.5, 75 / dist - 1.5)));
+    }
+
     // Draws a circle ball on screen.
     static drawBall(ball) {
         ctx.beginPath();
         ctx.arc(...toScreenCoords(ball.x,ball.y), ball.radius/zoom, 0, Math.PI * 2, true);
         ctx.closePath();
+
         ctx.fillStyle = ball.color;
+        ctx.lineWidth = 4;
+        ctx.strokeStyle = ball.outline;
+
+        ctx.stroke();
         ctx.fill();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1;
     }
 
     // Jesus christ
@@ -252,11 +317,18 @@ class node {
 
         ctx.closePath();
         ctx.fillStyle = ball.color;
+        ctx.lineWidth = 4;
+
+        ctx.strokeStyle = ball.outline;
+        ctx.stroke();
         ctx.fill();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1;
     }
 
     static randomPosition() {
-        return Math.random() * 200 - 100;
+        return Math.random() * 500 - 250;
     }
 }
 
@@ -287,6 +359,7 @@ function* toScreenCoords(x,y) {
     yield (x-xoffset)/zoom+canvas.width/2
     yield (y-yoffset)/zoom+canvas.height/2
 }
+
 function* fromScreenCoords(x,y) {
     yield (x-canvas.width/2)*zoom + xoffset
     yield (y-canvas.height/2)*zoom + yoffset
