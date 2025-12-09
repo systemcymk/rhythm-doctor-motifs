@@ -9,9 +9,9 @@ var balls = {}
 var ballsMotifs = {} // for leitmotifs that coalesce into a track
 let data = {}
 async function initiate() {
-    let rawJson = await fetch(window.location.origin + "/rhythm-doctor-leitmotifs.json");
+    let rawJson = await fetch(window.location.origin + "/rhythm-doctor-leitmotifs_dev.json");
     if (!rawJson.ok) {
-        rawJson = await fetch(window.location.origin + "/rhythm-doctor-motifs/rhythm-doctor-leitmotifs.json");
+        rawJson = await fetch(window.location.origin + "/rhythm-doctor-motifs/rhythm-doctor-leitmotifs_dev.json");
         console.log("Running on GitHub Pages!");
         if (!rawJson.ok)
             throw new Error(`Couldn't retrieve JSON! ${rawJson.status} - ${rawJson.statusText}`);
