@@ -3,11 +3,7 @@ const canvas2 = document.getElementById("layer2");
 const ctx = canvas.getContext("2d");
 const ctx2 = canvas2.getContext("2d");
 
-const LEITMOTIF_COLOR = "#54527aff";
-const LEITMOTIF_TRACK_COLOR = "#54527aff";
-const TRACK_COLOR = "#b592db";
-const MINOR_TRACK_COLOR = "#b592db";
-const ISOLATE_COLOR = "#9797b3";
+const CULLING_DISTANCE = 120;
 
 var balls = {}
 var ballsMotifs = {} // for leitmotifs that coalesce into a track
@@ -66,6 +62,7 @@ function createTrees(newData) {
         balls[id] = new node(id, track.name ?? track);
         balls[id].resetStyle();
 
+        if (track.prefix) balls[id].prefix = track.prefix
         if (track.subtitle) balls[id].subtitle = track.subtitle
         if (track.leitmotifs) medleys[id] = track.leitmotifs
     });
@@ -76,8 +73,10 @@ function createTrees(newData) {
         // if a motif is primarily found in one track, then we consider the motif to be the track itself.
         const motifID = subdata.id ??= motif;
         if (motifID == motif) balls[motifID] = new node(motifID, subdata.name);
+        if (subdata.prefix) balls[motifID].prefix = subdata.prefix
         if (subdata.subtitle) balls[motifID].subtitle = subdata.subtitle
         removeFrom(isolates, motifID);
+        balls[motifID].isIsolate = false;
 
         const curBall = balls[motifID];
         ballsMotifs[motif] = curBall;
@@ -85,8 +84,10 @@ function createTrees(newData) {
         if (subdata.style) curBall.applyStyle(subdata.style);
 
         subdata.associations.forEach(id => {
+            console.log(curBall.name);
             curBall.addChild(balls[id]);
             removeFrom(isolates, id);
+            balls[id].isIsolate = false;
         });
     });
 
@@ -95,15 +96,17 @@ function createTrees(newData) {
         const curBall = balls[track];
         if (Object.keys(motifs).length > 3) curBall.applyStyle("medley");
         removeFrom(isolates, track);
+        balls[track].isIsolate = false;
 
         Object.entries(motifs).forEach(([motif, subdata]) => {
             balls[motif].addChild(curBall);
             removeFrom(isolates, motif);
+            balls[motif].isIsolate = false;
         });
     });
 
     Object.entries(newData.tracks).forEach(([id, track]) => {
-        if (isolates.indexOf(id) >= 0) balls[id].applyStyle("isolate");
+        if (balls[id].isIsolate) balls[id].applyStyle("isolate");
         if (track.isMinor) balls[id].applyStyle("minor")
         if (track.style) balls[id].applyStyle(track.style)
     });
@@ -136,9 +139,11 @@ GRAVITY = 0.00025
 class node {
     motifs = [];
     children = [];
+    isIsolate = true;
     isEnabled = true;
 
     data;
+    prefix;
     subtitle;
     dist = 0;
 
@@ -154,49 +159,80 @@ class node {
         this.y = y == undefined ? node.randomPosition() : y;
         this.id = id;
         this.name = name || id;
+
+        if (this.id.replace(/[0-9\-NX]*/, '') == '') this.prefix = id;
     }
 
-    draw() {
-        if (!this.isEnabled) return;
+    sx;
+    sy;
 
-        let [sx,sy] = toScreenCoords(this.x,this.y)
-        this.dist = pythagoras(sx - cursor.x, sy - cursor.y);
+    draw() {
+        if (this.x != this.x) throw "SOMETHING HAS GONE TERRIBLY WRONG . node id: " + this.id + ", node name: " + this.name
+        if (!this.isEnabled) return;
+        [this.sx,this.sy] = toScreenCoords(this.x,this.y);
+
+        if (this.isOffscreen()) return;
+        this.dist = pythagoras(this.sx - cursor.x, this.sy - cursor.y);
 
         ctx.globalAlpha = node.bodyAlpha(this.dist);
         if (this.sides <= 0) node.drawBall(this);
         else node.drawPolygon(this);
 
-        ctx2.lineWidth = 4;
-
-        ctx2.textAlign = "center"
-        ctx2.font = `${16/zoom}px rhythmdoctor`
-        // ctx.font = `${300/zoom/Math.max(24, this.name.length)}px rhythmdoctor`
         ctx2.fillStyle = "#ffffff";
         ctx2.strokeStyle = "#000000";
 
-        const textY = sy + (2.5 + this.radius * 2) / zoom;
+        ctx2.lineWidth = getStrokeZoomed(4);
         ctx2.globalAlpha = node.textAlpha(this.dist);
-        ctx2.strokeText(this.name, sx, textY);
-        ctx2.fillText(this.name, sx, textY);
+        const textY = this.getTextY();
 
-        if (this.subtitle) {
-            ctx.textAlign = "center"
-            ctx.font = `${16/zoom}px rhythmdoctor`
-            ctx.fillStyle = "#7f7f7f";
-            ctx.strokeStyle = "#000000";
+        if (!this.prefix) {
+            node.drawText(ctx2, this.name, this.sx, textY);
+        } else {
+            ctx2.textAlign = "left"
+            const fullText = this.prefix + " " + this.name;
 
-            ctx.lineWidth = 4;
+            const width = ctx2.measureText(this.name).width;
+            const fullwidth = ctx2.measureText(fullText).width;
 
-            const textY = sy + (20.5 + this.radius * 2) / zoom;
-            ctx.globalAlpha = ctx2.globalAlpha;
-            ctx.strokeText(this.subtitle, sx, textY);
-            ctx.fillText(this.subtitle, sx, textY);
+            const postX = this.sx - (width - fullwidth * 0.5);
+            node.drawText(ctx2, this.name, postX, textY);
+
+            ctx2.fillStyle = "#ccff22";
+            const preX = this.sx - fullwidth * 0.5;
+            node.drawText(ctx2, this.prefix, preX, textY);
+            ctx2.textAlign = "center";
         }
 
-        ctx.lineWidth = 1;
-        ctx.globalAlpha = 1;
+        if (this.subtitle) {
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#7f7f7f";
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = ctx2.lineWidth;
+
+            ctx.globalAlpha = ctx2.globalAlpha;
+            node.drawText(ctx, this.subtitle, this.sx, this.getTextY(1));
+
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = 1;
+        }
+
         ctx2.lineWidth = 1;
         ctx2.globalAlpha = 1;
+    }
+
+    getTextY(line = 0) {
+        return this.sy + ((line * 18) + 2.5 + this.radius * 2) / zoom;
+    }
+
+    static drawText(ctx, text, x, y) {
+        ctx.strokeText(text, x, y);
+        ctx.fillText(text, x, y);
+    }
+
+    isOffscreen() {
+        if (-CULLING_DISTANCE > this.sx || this.sx > screen.width + CULLING_DISTANCE) return true;
+        if (-CULLING_DISTANCE > this.sy || this.sy > screen.height + CULLING_DISTANCE) return true;
+        return false;
     }
 
     vx = 0;
@@ -213,14 +249,16 @@ class node {
             const dist = pythagoras(dx, dy)
 
             const isChild = this.motifs.includes(ball);
-            if (isChild) drawEdge(this.x, this.y, ball.x, ball.y, node.lineAlpha(this.dist));
+            if (isChild) drawEdge(this.x, this.y, ball.x, ball.y, node.lineAlpha(this.dist), node.lineWeight(this.dist));
 
             if (isChild || this.children.includes(ball)) {
                 let spring = Math.max(-2000, Math.min(2000, -SPRING_CONSTANT * (dist - IDEAL)))
+                if (spring != spring) throw "WHAT THE HELL " + this.id + " " + ball.id
                 this.ax += spring * dx / dist;
                 this.ay += spring * dy / dist;
             } else {
                 let repulsion = Math.min(1000, PERMITTIVITY / Math.max(REPULSE_DISTANCE_MIN, dist**1.5))
+                if (repulsion != repulsion) throw "WHAT THE HELL AGAIN " + this.id + " " + ball.id
                 this.ax += repulsion * dx / dist;
                 this.ay += repulsion * dy / dist;
             }
@@ -231,7 +269,7 @@ class node {
     // Else, this is handled by interact(), for minor performance reasons.
     drawEdges() {
         Object.entries(this.motifs).forEach(([_, ball]) => {
-            drawEdge(this.x, this.y, ball.x, ball.y, 1);
+            drawEdge(this.x, this.y, ball.x, ball.y, 1, 2);
         });
     }
 
@@ -273,15 +311,19 @@ class node {
     }
 
     static bodyAlpha(dist) {
-        return Math.max(0.5, Math.min(1, 500 / dist));
+        return Math.max(0.5, Math.min(1, Math.max(75 / dist + 0.5, 100 / dist - 1.5)));
     }
 
     static textAlpha(dist) {
-        return Math.max(0.5, Math.min(1, Math.max(50 / dist + 0.5, 150 / dist - 1.5)));
+        return Math.max(0.5, Math.min(1, Math.max(50 / dist + 0.5, 100 / dist - 1.5)));
     }
 
     static lineAlpha(dist) {
         return Math.max(0.5, Math.min(1, Math.max(25 / dist + 0.5, 75 / dist - 1.5)));
+    }
+
+    static lineWeight(dist) {
+        return Math.max(1, Math.min(1.25, Math.max(7 / dist + 1, 25 / dist - 1.5)));
     }
 
     // Draws a circle ball on screen.
@@ -291,7 +333,7 @@ class node {
         ctx.closePath();
 
         ctx.fillStyle = ball.color;
-        ctx.lineWidth = 4;
+        ctx.lineWidth = getStrokeZoomed(4);
         ctx.strokeStyle = ball.outline;
 
         ctx.stroke();
@@ -317,7 +359,7 @@ class node {
 
         ctx.closePath();
         ctx.fillStyle = ball.color;
-        ctx.lineWidth = 4;
+        ctx.lineWidth = getStrokeZoomed(4);
 
         ctx.strokeStyle = ball.outline;
         ctx.stroke();
@@ -332,14 +374,16 @@ class node {
     }
 }
 
-function drawEdge(x1,y1,x2,y2,a) {
+function drawEdge(x1,y1,x2,y2,a,w) {
     ctx.strokeStyle = "#aaaacc";
     ctx.globalAlpha = a;
+    ctx.lineWidth = w;
     ctx.beginPath();
     ctx.moveTo(...toScreenCoords(x1,y1));
     ctx.lineTo(...toScreenCoords(x2,y2));
     ctx.stroke();
     ctx.globalAlpha = 1;
+    ctx.lineWidth = 1;
 }
 
 var cursor = {
@@ -380,13 +424,18 @@ function draw() {
     ctx2.canvas.height = window.innerHeight;
     [cursor.screenX, cursor.screenY] = fromScreenCoords(cursor.x, cursor.y);
 
+    ctx.font = `${16/zoom}px rhythmdoctor`
+    ctx2.font = ctx.font
+
     // Process physics, draw edges
     Object.entries(balls).forEach(([id, ball]) => {
         if (id != draggedNode) {
             ball.vx += ball.ax;
             ball.vy += ball.ay;
+
             ball.ax = -GRAVITY * ball.x - FRICTION * ball.vx
             ball.ay = -GRAVITY * ball.y - FRICTION * ball.vy
+
             Object.entries(balls).forEach(([_, ballb]) => {
                 ball.interact(ballb);
             });
@@ -427,7 +476,7 @@ function dragStart(event, radius = 1.5) {
     Object.entries(balls).forEach(([id,ball]) => {
         let [screenx,screeny] = toScreenCoords(ball.x, ball.y)
         const dist = pythagoras(event.pageX - screenx, event.pageY - screeny - getCanvasOffset());
-        if (dist <= ball.radius / zoom * radius) {
+        if (dist <= ball.radius / zoom * radius + Math.max(0, zoom * 4 - 4)) {
             draggedNode = id
         }
     });
@@ -464,6 +513,10 @@ function dragMove(event) {
             [balls[draggedNode].x, balls[draggedNode].y] = fromScreenCoords(dragAnchor.x-dragOffset.x+event.pageX,dragAnchor.y-dragOffset.y+event.pageY)
         }
     }
+}
+
+function getStrokeZoomed(size) {
+    return Math.max(size, size / zoom);
 }
 
 canvas.onmousemove = dragMove
@@ -533,3 +586,40 @@ document.onwheel = event => {
     xoffset += -newx+x
     yoffset += -newy+y
 }
+
+
+    // // Assumes no newlines. Why add a newline??
+    // static drawComplexText(ctx, compound, x, y, sep = ' ') {
+    //     const initAlign = ctx.textAlign;
+    //     const initColor = ctx.fillStyle;
+
+    //     const fullText = compound.join();
+    //     const fullWidth = ctx.measureText(fullText);
+
+    //     const rightmost = x + fullWidth * 0.5;
+    //     /* Well, we're only really using... centered aligned text... */
+    //     // let rightmost;
+    //     // switch (initAlign) {
+    //     //     case 'start': 
+    //     //         rightmost = ctx.canvas.getComputedStyle("direction") == "ltr" ? x + fullWidth : x;
+    //     //         break;
+    //     //     case 'end':
+    //     //         rightmost = ctx.canvas.getComputedStyle("direction") == "rtl" ? x + fullWidth : x;
+    //     //         break;
+    //     //     case 'left':
+    //     //         rightmost = x + fullWidth;
+    //     //         break;
+    //     //     case 'right':
+    //     //         rightmost = x;
+    //     //         break;
+    //     //     case 'center':
+    //     //         rightmost = x + fullWidth * 0.5;
+    //     //         break;
+    //     // }
+
+    //     for (let i = compound.length - 1; i >= 0; i--) {
+    //         ctx.fillStyle = compound[i]?.color ?? initColor;
+    //         ctx.strokeText(text, x, y);
+    //         ctx.fillText(text, x, y);
+    //     }
+    // }
