@@ -1,0 +1,200 @@
+{
+    "name": "Rhythm Doctor",
+    "description": [
+        "Press space on the 7th beat!",
+        "by 7th Beat Games"
+    ],
+
+    "id": "rhythmdoctor",
+    "dependencies": [""],
+
+    "trackData": {
+        "1-1": "Samurai Techno",
+        "1-1N": "Samurai Dubstep",
+        "1-2": "Intimate",
+        "1-X": "Battleworn Insomniac",
+        "1-XN": "Super Battleworn Insomniac",
+        "1-CNY": "Chinese New Year",
+
+        "2-1": "Lo-fi Hip-Hop Beats To Treat Patients To",
+        "2-1N": "wish i could care less",
+        "2-2": "Supraventricular Tachychardia",
+        "2-2N": "Unreachable",
+        "2-3": "Puff Piece",
+        "2-3N": "Bomb-Sniffing Pomeranian",
+        "2-4": "Song of the Sea",
+        "2-X": "All The Times",
+        "2-B1": "Beans Hopper",
+
+        "3-1": "Sleepy Garden",
+        "3-1N": "Lounge",
+        "3-2": "Classy",
+        "3-3": "Distant Duet",
+        "3-X": "One Shift More",
+        "3-X2": "Rhythm Dogtor",
+
+        "4-1": "Training Doctor's Train Ride Performance",
+        "4-1N": "Rollerdisco Rumble",
+        "4-2": "Invisible",
+        "4-3": "Steinway",
+        "4-4": "Know You",
+        "4-4N": "Murmurs",
+
+        "5-1": "Lucky Break",
+        "5-1N": "One Slip Too Late",
+        "5-2": "Lo-Fi Beats For Patients To Chill To",
+        "5-2N": "Unsustainable Inconsolable",
+        "5-3": "Seventh Inning Stretch",
+        "5-X": "Dreams Don't Stop",
+
+        "X-1": "Art Exercise",
+        "X-0": "Helping Hands",
+
+        "2-IN": {
+            "name": "Puff Piece",
+            "subtitle": "(Intermission)",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "3-IN": {
+            "name": "Distant Duet",
+            "subtitle": "(Intermission)",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "3-IN_Paige": {
+            "name": "One Shift More",
+            "subtitle": "(Intermission/Sleeve Paint)",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "5-IN": {
+            "name": "Fortunate Rest",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "5-IN_FINALE": {
+            "name": "Dreams Don't Stop",
+            "subtitle": "(Intermission)",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "5-IN_Edega": {
+            "name": "Boss Music",
+            "embeds": {
+                "files": [
+                ]
+            }
+        }
+    },
+
+    "leitmotifs": {
+        "rhythmdoctor": {
+            "name": "Rhythm Doctor",
+            "associations": [
+            ]
+        },
+        "samurai": {
+            "id": "1-1",
+            "subtitle": "Samurai",
+            "associations": [
+                "1-1",
+                "1-1N",
+                "1-X",
+                "1-XN",
+                "4-4N"
+            ]
+        },
+        "intimate": {
+            "id": "1-2",
+            "subtitle": "Logan & Hailey",
+            "associations": [
+                "1-2",
+                "4-4N"
+            ]
+        },
+        "cole": {
+            "id": "2-1",
+            "subtitle": "Cole Brew",
+            "associations": [
+                "2-1",
+                "2-1N",
+                "5-2"
+            ]
+        },
+        "nicole": {
+            "id": "2-3",
+            "subtitle": "Nicole Ting",
+            "associations": [
+                "2-3",
+                "2-X",
+                "2-IN"
+            ]
+        },
+        "duet": {
+            "id": "3-3",
+            "subtitle": "Stevensons",
+            "associations": [
+                "3-3",
+                "3-IN"
+            ]
+        },
+        "paige": {
+            "id": "3-X",
+            "subtitle": "Paige",
+            "associations": [
+                "3-X",
+                "3-X2",
+                "3-IN_Paige"
+            ]
+        },
+        "lucky": {
+            "id": "5-1",
+            "associations": [
+                "5-1",
+                "5-2",
+                "5-3",
+                "5-X"
+            ]
+        },
+        "edega": {
+            "id": "5-IN_Edega",
+            "subtitle": "Edega",
+            "associations": [
+                "5-IN_Edega",
+                "5-IN_FINALE"
+            ]
+        },
+        "dreamsdontstop": {
+            "id": "5-X",
+            "associations": [
+                "5-X",
+                "5-IN_FINALE"
+            ]
+        },
+        "bomb": {
+            "name": "Artificial Intelligence Bomb",
+            "associations": [
+                "2-3N"
+            ]
+        }
+    }
+}
