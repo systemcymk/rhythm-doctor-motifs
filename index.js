@@ -6,9 +6,9 @@ const layers = [...document.getElementById("canvas").children];
 const camera = new Camera(layers);
 
 // For the UI + Search menu !!
-const sfxPagerIn = new Audio('/sfx/sndPagerOpen.ogg');
-const sfxPagerOut = new Audio('/sfx/sndPagerClose.ogg');
-const sfxNope = new Audio('/sfx/sndError.ogg');
+const sfxPagerIn = new Audio(rootDirectory + '/sfx/sndPagerOpen.ogg');
+const sfxPagerOut = new Audio(rootDirectory + '/sfx/sndPagerClose.ogg');
+const sfxNope = new Audio(rootDirectory + '/sfx/sndError.ogg');
 
 var raf; // I'm not sure why this is being kept track of, but... ok!
 var cursor = {
@@ -58,7 +58,6 @@ function refreshTree(newData) {
         if (subdata.prefix) balls[motifID].prefix = subdata.prefix
         if (subdata.subtitle) balls[motifID].subtitle = subdata.subtitle
         removeFrom(isolates, motifID);
-        console.log(motifID, balls[motifID])
         balls[motifID].isIsolate = false;
 
         const curBall = balls[motifID];
@@ -67,7 +66,6 @@ function refreshTree(newData) {
         if (subdata.style) curBall.applyStyle(subdata.style);
 
         subdata.associations.forEach(id => {
-            console.log(curBall.name);
             curBall.addChild(balls[id]);
             removeFrom(isolates, id);
             balls[id].isIsolate = false;
@@ -366,4 +364,4 @@ document.onwheel = event => {
 }
 
 window.onload = draw;
-loadJson("/rhythm-doctor-leitmotifs.json");
+loadJson(rootDirectory + "/rhythm-doctor-leitmotifs.json");

@@ -1,4 +1,6 @@
-// some extra utility functions that don't really make sense to put anywhere else.js
+// some extra utility stuff that don't really make sense to put anywhere else.js
+const githubPath = '/rhythm-doctor-motifs';
+const rootDirectory = window.location.origin.match('zxcksharks.github.io') ? '' : githubPath;
 
 function mergeData(base, data) {
     for (const [key, value] of Object.entries(data)) {

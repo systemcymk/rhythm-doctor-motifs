@@ -11,7 +11,7 @@ body {
     height: 100%;
 
     position: fixed;
-    background-image: url("/GridSquare.png");
+    background-image: url("./GridSquare.png");
     image-rendering: pixelated;
 }
 
@@ -93,13 +93,13 @@ body {
 
 @font-face {
   font-family: rhythmdoctor;
-  src: url('/fonts/04b03-font/04B_03__.TTF');
+  src: url('./fonts/04b03-font/04B_03__.TTF');
 }
 
 @font-face {
     font-family: 'profontwindowsregular';
-    src: url('/fonts/pfw-webfont.woff2') format('woff2'),
-         url('/fonts/pfw-webfont.woff') format('woff');
+    src: url('./fonts/pfw-webfont.woff2') format('woff2'),
+         url('./fonts/pfw-webfont.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
