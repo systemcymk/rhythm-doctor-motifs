@@ -1,34 +1,21 @@
 :root {
     --BACKGROUND_COLOR: #1f1f1f7f;
-}
+    background-color: #1f1f1f;
 
-* {
-  font-family: 'profontwindowsregular';
+    font-family: 'profontwindowsregular';
+    color: #ccccdd;
 }
 
 body {
-  background-color: #1f1f1f;
-  color: #ccccdd
-}
+    width: 100%;
+    height: 100%;
 
-.t1 {
     position: fixed;
-    z-index: 1000;
-    float: inline-start;
-    backdrop-filter: blur(10px);
-    background-color: var(--BACKGROUND_COLOR);
+    background-image: url("/GridSquare.png");
+    image-rendering: pixelated;
 }
 
-.t2 {
-    position: fixed;
-    z-index: 1000;
-    float: right;
-    right: 10px;
-    backdrop-filter: blur(10px);
-    background-color: var(--BACKGROUND_COLOR);
-}
-
-.canvas {
+#canvas {
     padding: 0;
     margin: 0;
     touch-action: none;
@@ -47,17 +34,91 @@ body {
     pointer-events: inherit;
 }
 
+#searchlayer {
+    /* position: absolute; */
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    top: 0px; left: 0px;
+}
+
+#searchbox {
+    position: absolute;
+    backdrop-filter: blur(10px);
+    background-color: var(--BACKGROUND_COLOR);
+    pointer-events: all;
+    right: 0px;
+    bottom: 0px;
+}
+
+@keyframes slidetotheleft {
+    0% {right: -100%}
+    100% {right: 0px}
+}
+
+@keyframes slidetotheright {
+    0% {right: 0px}
+    100% {right: -100%}
+}
+
+#searchview {
+    position: absolute;
+    overflow-y: scroll;
+    pointer-events: all;
+    backdrop-filter: blur(10px);
+    background-color: var(--BACKGROUND_COLOR);
+    height: 100%;
+    width: 100%;
+    right: -100%;
+    bottom: 3em;
+    animation: 1s ease-in-out;
+    animation-name: slidetotheright;
+    animation-fill-mode: both;
+}
+
+.hud:focus-within #searchview {
+    right: 0px;
+    animation-name: slidetotheleft;
+}
+
+.hud {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000;
+    bottom: 3em;
+    right: 10px;
+    height: 50%;
+    width: 12em;
+}
+
 @font-face {
   font-family: rhythmdoctor;
-  src: url('04b03-font/04B_03__.TTF');
+  src: url('/fonts/04b03-font/04B_03__.TTF');
 }
 
 @font-face {
     font-family: 'profontwindowsregular';
-    src: url('pfw-webfont.woff2') format('woff2'),
-         url('pfw-webfont.woff') format('woff');
+    src: url('/fonts/pfw-webfont.woff2') format('woff2'),
+         url('/fonts/pfw-webfont.woff') format('woff');
     font-weight: normal;
     font-style: normal;
+}
+
+.t1 {
+    position: fixed;
+    z-index: 1000;
+    float: inline-start;
+    backdrop-filter: blur(10px);
+    background-color: var(--BACKGROUND_COLOR);
+}
+
+.t2 {
+    position: fixed;
+    z-index: 1000;
+    float: right;
+    right: 10px;
+    backdrop-filter: blur(10px);
+    background-color: var(--BACKGROUND_COLOR);
 }
 
 a:link {

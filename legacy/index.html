@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>Rhythm Doctor Leitmotifs</title>
-		<link rel="stylesheet" type="text/css" href="stylesheet.css">
+		<link rel="stylesheet" type="text/css" href="stylesheet-legacy.css">
 		<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 		<meta name=“viewport” content=“width=device-width, initial-scale=1.0”>
 		<meta http-equiv=“X-UA-Compatible” content=“ie=edge”>
@@ -12,11 +12,10 @@
 		<meta property="og:description" content="graph of the rhythm doctor (act 5 update) ost !!" />
 		<meta name="theme-color" content="#b592db">
 	</head>
-	<body>
-		<div id="canvas">
+	<body onload="draw()" style="position: fixed;">
+		<div class="canvas">
 			<canvas id="layer1" class="layer" width="1920" height="1080"></canvas>
 			<canvas id="layer2" class="layer" width="1920" height="1080"></canvas>
-			<canvas id="layer3" class="layer" width="1920" height="1080"></canvas>
 		</div>
 		<div class="t1">the rhythm doctor leitmotif graph is unofficial and unaffiliated with 7th Beat Games and Rhythm Doctor.</div>
 		<div class="t2">drag to pan, scroll to zoom, drag nodes to move them around</div>
@@ -24,19 +23,7 @@
 		<div class="t1">happy Rhythm Doctor 1.0 release !! website still heavily under development</div>
 		<a class="t2" href="https://m1n3c4rt.github.io/utdr-leitmotif-graph">check out the original UNDERTALE/DELTARUNE motifs page by M1n3c4rt</a>
 		<br/>
-		<div class="hud">
-			<div id="searchview">
-				<canvas id="searchlayer"></canvas>
-			</div>
-			<div id="searchbox">
-				awa <label for="search">search for node:</label> <input id="search">
-			</div>
-		</div>
 		<!-- <div id="t3">debugtext</div> -->
 	</body>
-	<!-- would have loved to use `type="module"` here but goodness is it annoying to work with -->
-	<script src="utils.js"></script>
-	<script src="ball.js"></script>
-	<script src="camera.js"></script>
-	<script src="index.js"></script>
+	<script src="index-legacy.js"></script>
 </html>

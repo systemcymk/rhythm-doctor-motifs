@@ -43,9 +43,15 @@
     },
 
     "tracks": {
-        "1-1": "Samurai Techno",
+        "1-1": {
+            "name": "Samurai Techno",
+            "subtitle": "Samurai"
+        },
         "1-1N": "Samurai Dubstep",
-        "1-2": "Intimate",
+        "1-2": {
+            "name": "Intimate",
+            "subtitle": "Logan & Hailey"
+        },
         "1-X": "Battleworn Insomniac",
         "1-XN": "Super Battleworn Insomniac",
         "1-CNY": {
@@ -59,7 +65,10 @@
 
         "2-1": "Lo-fi Hip-Hop Beats To Treat Patients To",
         "2-1N": "wish i could care less",
-        "2-2": "Supraventricular Tachychardia",
+        "2-2": {
+            "name": "Supraventricular Tachychardia",
+            "subtitle": "Cole Brew"
+        },
         "2-2N": "Unreachable",
         "2-3": "Puff Piece",
         "2-3N": "Bomb-Sniffing Pomeranian",
@@ -75,7 +84,10 @@
         "3-1N": "Lounge",
         "3-2": "Classy",
         "3-3": "Distant Duet",
-        "3-X": "One Shift More",
+        "3-X": {
+            "name": "One Shift More",
+            "subtitle": "Paige"
+        },
         "3-X2": "Rhythm Dogtor",
 
         "4-1": "Training Doctor's Train Ride Performance",
@@ -97,7 +109,7 @@
         "6-2": "Welcome Back",
         "6-X": "Boss Fight",
 
-        "7-2": "Blurred",
+        "7-1": "Blurred",
         "7-X": {
             "name": "Miracle Defibrillator",
             "subtitle": "Montage",
@@ -181,6 +193,16 @@
             }
         },
 
+        "7-IN": {
+            "name": "Blurred",
+            "subtitle": "(Intermission)",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
         "7-IN_OSM-Paige": {
             "name": "One Shift More",
             "subtitle": "(Paige Returns)",
@@ -198,6 +220,9 @@
             "embeds": {
                 "files": [
                 ]
+            },
+            "leitmotifs": {
+                "7-X2": []
             }
         },
 
@@ -246,6 +271,7 @@
 
         "5-IN_Edega": {
             "name": "Boss Music",
+            "subtitle": "Edega",
             "embeds": {
                 "files": [
                 ]
@@ -296,9 +322,36 @@
             }
         },
 
+        "tutorial-milonga": {
+            "name": "Tutorial (Milonga)",
+            "subtitle": "5-3N 4 Beat Swing",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "tutorial-syncopation": {
+            "name": "Tutorial (Syncopation)",
+            "subtitle": "6-1 Synco",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
         "adofab": {
             "name": "A Dance Of Freeze & Burn",
             "subtitle": "Tutorial (House)",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "rhythmstacker": {
+            "name": "Rhythm Stacker",
+            "subtitle": "Ian's Desktop",
             "embeds": {
                 "files": [
                 ]
@@ -310,24 +363,24 @@
         "rhythmdoctor": {
             "id": "title",
             "associations": [
+                "rhythmstacker"
             ]
         },
         "tutorial2": {
             "id": "tutorial",
             "associations": [
-                "tutorial",
                 "tutorial-synth",
                 "tutorial-funk",
                 "tutorial-triplet",
+                "tutorial-milonga",
+                "tutorial-syncopation",
                 "adofab",
                 "2-B1"
             ]
         },
         "samurai": {
             "id": "1-1",
-            "subtitle": "Samurai",
             "associations": [
-                "1-1",
                 "1-1N",
                 "1-X",
                 "1-XN",
@@ -336,40 +389,34 @@
         },
         "intimate": {
             "id": "1-2",
-            "subtitle": "Logan & Hailey",
             "associations": [
-                "1-2",
                 "4-4N",
                 "6-1"
             ]
         },
         "cole": {
             "id": "2-1",
-            "subtitle": "Cole Brew",
             "associations": [
-                "2-1",
                 "2-1N",
+                "3-X",
                 "5-2"
             ]
         },
         "careless": {
             "id": "2-1N",
             "associations": [
-                "2-1N",
                 "2-XN"
             ]
         },
         "svt": {
             "id": "2-2",
             "associations": [
-                "2-2"
             ]
         },
         "nicole": {
             "id": "2-3",
             "subtitle": "Nicole Ting",
             "associations": [
-                "2-3",
                 "2-X",
                 "2-IN"
             ]
@@ -377,7 +424,6 @@
         "allthetimes": {
             "id": "2-X",
             "associations": [
-                "2-X"
             ]
         },
         "bittertimes": {
@@ -391,7 +437,6 @@
             "id": "3-3",
             "subtitle": "Stevensons",
             "associations": [
-                "3-3",
                 "3-IN",
                 "5-3N"
             ]
@@ -400,18 +445,17 @@
             "id": "3-X",
             "subtitle": "Paige",
             "associations": [
-                "3-X",
                 "3-X2",
                 "3-IN_OSM",
                 "7-IN_OSM-Paige",
                 "7-IN_OSM-Edega",
+                "6-2",
                 "6-X"
             ]
         },
         "lucky": {
             "id": "5-1",
             "associations": [
-                "5-1",
                 "5-2",
                 "5-3",
                 "5-X",
@@ -420,16 +464,21 @@
         },
         "edega": {
             "id": "5-IN_Edega",
-            "subtitle": "Edega",
             "associations": [
                 "5-IN_DDS-Edega",
-                "6-X"
+                "6-X",
+                "7-1"
+            ]
+        },
+        "mark": {
+            "id": "7-1",
+            "associations": [
+                "7-IN"
             ]
         },
         "dreamsdontstop": {
             "id": "5-X",
             "associations": [
-                "5-X",
                 "5-IN_DDS-Piano",
                 "5-IN_DDS-Edega",
                 "5-IN_DDS-Virus"

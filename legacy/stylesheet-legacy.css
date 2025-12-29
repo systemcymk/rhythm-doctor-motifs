@@ -1,0 +1,83 @@
+:root {
+    --BACKGROUND_COLOR: #1f1f1f7f;
+}
+
+* {
+  font-family: 'profontwindowsregular';
+}
+
+body {
+  background-color: #1f1f1f;
+  color: #ccccdd
+}
+
+.t1 {
+    position: fixed;
+    z-index: 1000;
+    float: inline-start;
+    backdrop-filter: blur(10px);
+    background-color: var(--BACKGROUND_COLOR);
+}
+
+.t2 {
+    position: fixed;
+    z-index: 1000;
+    float: right;
+    right: 10px;
+    backdrop-filter: blur(10px);
+    background-color: var(--BACKGROUND_COLOR);
+}
+
+.canvas {
+    padding: 0;
+    margin: 0;
+    touch-action: none;
+    display: contents;
+    position: absolute;
+    top: 0px; left: 0px;
+}
+
+.layer {
+    position: absolute;
+    pointer-events: none;
+    top: 0px; left: 0px;
+}
+
+#layer1 {
+    pointer-events: inherit;
+}
+
+@font-face {
+  font-family: rhythmdoctor;
+  src: url('/fonts/04b03-font/04B_03__.TTF');
+}
+
+@font-face {
+    font-family: 'profontwindowsregular';
+    src: url('/fonts/pfw-webfont.woff2') format('woff2'),
+         url('/fonts/pfw-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+a:link {
+    color: rgb(149, 136, 238)
+}
+
+
+a:hover {
+    color: rgb(180, 169, 252)
+}
+
+
+a:visited {
+    color: rgb(180, 169, 252)
+}
+
+a:visited:hover {
+    color: rgb(149, 136, 238)
+}
+
+a:active {
+    color: rgb(79, 67, 161) !important
+}
