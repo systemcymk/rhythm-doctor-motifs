@@ -10,6 +10,8 @@ const searchCamera = new Camera([document.getElementById("searchlayer")]);
 const sfxPagerIn = new Audio(rootDirectory + '/sfx/sndPagerOpen.ogg');
 const sfxPagerOut = new Audio(rootDirectory + '/sfx/sndPagerClose.ogg');
 const sfxNope = new Audio(rootDirectory + '/sfx/sndError.ogg');
+const sfxFocus = new Audio(rootDirectory + '/sfx/sndPagerCategory.ogg');
+const sfxExit = new Audio(rootDirectory + '/sfx/sndTransitionShort.ogg');
 
 var raf; // I'm not sure why this is being kept track of, but... ok!
 var cursor = {
@@ -185,6 +187,24 @@ const lastPinchPos = {
     x2: 0, y2: 0
 }
 
+function select(event, radius = 1.5) {
+    if (Object.entries(balls).some(([id,ball]) => {
+        if (!ball.isEnabled) return;
+        let [screenx,screeny] = camera.toScreenCoords(ball.x, ball.y);
+        const dist = pythagoras(event.pageX - screenx, event.pageY - screeny - camera.getCanvasOffset());
+        if (dist <= ball.radius / camera.zoom * radius + Math.max(0, camera.zoom * 4 - 4)) {
+            setBallFocus(ball);
+            return true;
+        }
+    })) {
+        sfxPagerIn.currentTime = 0;
+        sfxPagerIn.play();
+    } else if (ballInFocus) {
+        unfocusBall();
+    }
+}
+canvas.ondblclick = select
+
 function dragStart(event, radius = 1.5) {
     isDragging = true
     camera.focus.blocked = true;
@@ -319,7 +339,9 @@ function setBallFocus(ball) {
     if (ballInFocus) {
         ballInFocus.inFocus = true;
         camera.focus.enabled = true;
-        ballInFocus.searchBall.camera.scenes[0].parentNode.scrollTop = (searchResults.indexOf(ballInFocus) - 3) * 69;
+
+        const index = searchResults.indexOf(ballInFocus);
+        if (index > -1) ballInFocus.searchBall.camera.scenes[0].parentNode.scrollTop = (index - 3) * 69;
     } else 
         camera.focus.enabled = false;
 }
@@ -380,6 +402,7 @@ searchCamera.scenes[0].onwheel = event => {
 }
 
 searchCamera.scenes[0].onmousedown = event => {
+    event.preventDefault();
     event.stopPropagation();
     const ballIndex = Math.floor((event.pageY - searchCamera.scenes[0].getBoundingClientRect().top) / 69);
     if (searchResults[ballIndex]) {
@@ -393,6 +416,25 @@ searchCamera.scenes[0].onmousedown = event => {
 searchCamera.scenes[0].onmouseup = event => {
     event.stopPropagation();
 }
+
+document.addEventListener("keydown", ({key}) => {
+    if (key === "Escape") {
+        if (ballInFocus) unfocusBall();
+        if (document.activeElement == search) {
+            search.blur();
+        }
+    }
+})
+
+search.addEventListener("focus", ({}) => {
+    sfxFocus.currentTime = 0;
+    sfxFocus.play();
+})
+
+search.addEventListener("blur", ({}) => {
+    sfxExit.currentTime = 0;
+    sfxExit.play();
+})
 
 window.onload = draw;
 loadJson(rootDirectory + "/rhythm-doctor-leitmotifs.json");
