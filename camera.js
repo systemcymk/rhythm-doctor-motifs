@@ -18,6 +18,7 @@ class Camera {
 
     zoom = 1;
     width; height;
+    fontSize;
 
     constructor(scenes = []) {
         this.scenes = scenes;
@@ -29,21 +30,22 @@ class Camera {
     refresh(deltaTime) {
         this.enforceBoundaries();
 
-        for (let i in this.layers) {
-            this.scenes[i].width  = window.innerWidth;
-            this.scenes[i].height = window.innerHeight;
-        }
-
         this.width = this.scenes[0].width;
         this.height = this.scenes[0].height;
+        this.fontSize = 16 / this.zoom;
 
         for (let i in this.layers) {
             this.layers[i].clearRect(0, 0, this.width, this.height);
+            this.scenes[i].width  = this.scenes[i].clientWidth;
+            this.scenes[i].height = this.scenes[i].clientHeight;
+            this.layers[i].font = `${this.fontSize}px rhythmdoctor`;
         }
 
         if (this.focus.enabled && !this.focus.blocked) {
             this.x = freyalerp(this.x, this.focus.x, 10, deltaTime);
             this.y = freyalerp(this.y, this.focus.y, 10, deltaTime);
+            if (this.focus.auto && this.x == this.focus.x && this.y == this.focus.y)
+                this.focus.enabled = false;
         }
     }
 

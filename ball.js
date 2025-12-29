@@ -1,4 +1,5 @@
 const EDGE_DISTANCE = 90;
+const UNFOCUS_DISTANCE = 120;
 const CULLING_DISTANCE = 120;
 
 SPRING_CONSTANT = 0.0015
@@ -17,6 +18,7 @@ class node {
     // Used in searching only; used for sorting searches.
     matchString;
     matchPercent = 0;
+    searchBall;
     searchTerms;
 
     id; // Must be present.
@@ -41,6 +43,9 @@ class node {
     // Styling information
     color = "#000000";
     outline = "#00000000";
+    thin = false; // If true, stops stroke from bleeding (visible when opacity < 1).
+
+    static thickOutline = false;
 
     // Creates the node. Note that the returned node isn't ready - camera and styles still need to be set.
     constructor(id, jsonDefinition, x, y) {
@@ -84,15 +89,15 @@ class node {
         const ctx2 = this.textLayer;
 
         // Draw the body
-        ctx.globalAlpha = node.bodyAlpha(this.scenedist);
+        ctx.globalAlpha = this.inFocus ? 1 : node.bodyAlpha(this.scenedist);
         if (this.sides <= 0) node.drawBall(this);
         else node.drawPolygon(this);
 
         ctx2.fillStyle = "#ffffff";
         ctx2.strokeStyle = "#000000";
 
-        ctx2.lineWidth = this.getStrokeZoomed(4);
-        ctx2.globalAlpha = node.textAlpha(this.scenedist);
+        ctx2.lineWidth = node.getStrokeZoomed(4, this.camera.zoom);
+        ctx2.globalAlpha = this.inFocus ? 1 : node.textAlpha(this.scenedist);
         const textY = this.sy + this.getTextOffset();
 
         if (!this.prefix) {
@@ -144,14 +149,21 @@ class node {
         return false;
     }
 
+    get shouldUnfocus() {
+        if (UNFOCUS_DISTANCE > this.sx || this.sx > camera.width - UNFOCUS_DISTANCE) return true;
+        if (UNFOCUS_DISTANCE > this.sy || this.sy > camera.height - UNFOCUS_DISTANCE * 2) return true;
+        return false;
+    }
+
     // Used in text rendering, generally when subtitles are present.
     getTextOffset(line = 0) {
         return ((line * 18) + 2.5 + this.radius * 2) / this.camera.zoom;
     }
 
     // Sets the camera used by the node. Returns itself for chaining.
-    setRenderInfo(camera) {
+    setRenderInfo(camera, search) {
         this.camera = camera;
+        this.searchBall = new searchnode(this, search);
         return this;
     }
 
@@ -162,6 +174,12 @@ class node {
         layer.fillText(text, x, y);
     }
 
+    // Renders the ball either as a polygon or a circle.
+    static drawGeneric(ball) {
+        if (ball.sides <= 0) node.drawBall(ball);
+        else node.drawPolygon(ball);
+    }
+
     // Renders the ball as a polygon.
     // Used over `drawBall()` when `sides > 0`.
     static drawPolygon(ball) {
@@ -170,6 +188,7 @@ class node {
 
         const rad = Math.PI * 2 + ball.angle;
         const radius = ball.radius / ball.camera.zoom;
+        const diameter = radius * 2;
 
         ctx.beginPath();
         ctx.moveTo(x + Math.cos(rad) * radius, y + Math.sin(rad) * radius);
@@ -182,12 +201,18 @@ class node {
         ctx.closePath();
 
         ctx.fillStyle = ball.color;
-        ctx.lineWidth = ball.getStrokeZoomed(4);
-        ctx.strokeStyle = ball.inFocus ? "#ffffff" : ball.outline;
-
+        ctx.lineWidth = node.getStrokeZoomed(4, ball.camera.zoom);
+        ctx.strokeStyle = ball.inFocus ? "#ffffff" : (node.thickOutline ? "#000000" : ball.outline);
         ctx.stroke();
-        ctx.fill();
 
+        if (ball.thin) {
+            ctx.save();
+            ctx.clip();
+            ctx.clearRect(x - radius, y - radius, diameter, diameter);
+            ctx.restore();
+        }
+
+        ctx.fill();
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1;
     }
@@ -196,18 +221,25 @@ class node {
     // Used over `drawPolygon()` when `sides == 0`.
     static drawBall(ball) {
         const ctx = ball.bodyLayer;
+        const radius = ball.radius / ball.camera.zoom;
 
         ctx.beginPath();
-        ctx.arc(ball.sx, ball.sy, ball.radius / ball.camera.zoom, 0, Math.PI * 2, true);
+        ctx.arc(ball.sx, ball.sy, radius, 0, Math.PI * 2, true);
         ctx.closePath();
 
         ctx.fillStyle = ball.color;
-        ctx.lineWidth = ball.getStrokeZoomed(4);
-        ctx.strokeStyle = ball.inFocus ? "#ffffff" : ball.outline;
-
+        ctx.lineWidth = node.getStrokeZoomed(4, ball.camera.zoom);
+        ctx.strokeStyle = ball.inFocus ? "#ffffff" : (node.thickOutline ? "#000000" : ball.outline);
         ctx.stroke();
-        ctx.fill();
 
+        if (ball.thin) {
+            ctx.save();
+            ctx.clip();
+            ctx.clearRect(ball.sx - radius, ball.sy - radius, diameter, diameter);
+            ctx.restore();
+        }
+
+        ctx.fill();
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1;
     }
@@ -282,7 +314,7 @@ class node {
     drawEdge(ball, alpha, width) {
         const ctx = ball.edgeLayer;
 
-        ctx.strokeStyle = "#aaaacc";
+        ctx.strokeStyle = "#92a39bff";
         ctx.globalAlpha = alpha;
         ctx.lineWidth = width;
 
@@ -318,11 +350,13 @@ class node {
         if (style) Object.entries(style).forEach(([property, value]) => {
             this[property] = value;
         });
+        return this;
     }
 
     // Apply the default style to this node.
     resetStyle(id) {
         this.forceStyle(data.styles.default);
+        return this;
     }
 
     // Apply the specified style (or the current style) to this node.
@@ -330,6 +364,7 @@ class node {
         if (id) this.style = id;
         const style = data.styles[this.style];
         if (style) this.forceStyle(style);
+        return this;
     }
 
     static bodyAlpha(dist) {
@@ -341,7 +376,7 @@ class node {
     }
 
     static lineAlpha(dist) {
-        return Math.max(0.5, Math.min(1, Math.max(25 / dist + 0.5, 75 / dist - 1.5)));
+        return Math.max(0.25, Math.min(1, Math.max(16 / dist + 0.5, 50 / dist - 1.5)));
     }
 
     static lineWeight(dist) {
@@ -349,7 +384,53 @@ class node {
     }
 
     // Text stroke.
-    getStrokeZoomed(size) {
-        return Math.max(size, size / this.camera.zoom);
+    static getStrokeZoomed(size, zoom) {
+        return Math.max(size, size / zoom);
+    }
+}
+
+class searchnode {
+    sx; sy;
+    camera; bodyLayer;
+    constructor(ball, camera) {
+        this.ball = ball;
+        this.camera = camera;
+        this.bodyLayer = camera.layers[0];
+    }
+
+    get ctx() { return this.bodyLayer; }
+    get color() { return this.ball.color; }
+    get outline() { return this.ball.outline; }
+    get inFocus() { return this.ball.inFocus; }
+    get radius() { return this.ball.radius; }
+    get angle() { return this.ball.angle; }
+    get sides() { return this.ball.sides; }
+
+    draw(x, y) {
+        this.sx = x; this.sy = y;
+        node.drawGeneric(this);
+
+        const xpos = this.sx + 36;
+        const ypos = this.ball.subtitle ? this.sy - 3 : this.sy + 4;
+
+        this.ctx.textAlign = "left"
+        this.ctx.strokeStyle = "#000000";
+        this.ctx.fillStyle = "#ffffff";
+        this.ctx.lineWidth = node.getStrokeZoomed(4, this.camera.zoom);
+
+        if (!this.ball.prefix) {
+            node.drawText(this.ctx, this.ball.name, xpos, ypos);
+        } else {
+            const width = this.ctx.measureText(this.ball.prefix + " ").width;
+
+            node.drawText(this.ctx, this.ball.name, xpos + width, ypos);
+            this.ctx.fillStyle = "#ccff22";
+            node.drawText(this.ctx, this.ball.prefix, xpos, ypos);
+        }
+
+        if (this.ball.subtitle) {
+            this.ctx.fillStyle = "#7f7f7f";
+            node.drawText(this.ctx, this.ball.subtitle, xpos, ypos + this.camera.fontSize + 2);
+        }
     }
 }

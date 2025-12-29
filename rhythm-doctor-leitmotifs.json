@@ -11,34 +11,47 @@
 
     "styles": {
         "default": {
-            "color": "#c1b448",
-            "outline": "#000000",
+            "color": "#F5E253",
+            "outline": "#E78320",
             "radius": 15,
             "sides": 3
         },
 
         "leitmotif": {
             "color": "#ff0d40",
+            "outline": "#880A47",
             "radius": 20,
             "sides": 5
         },
+
         "subtrack": {
             "sides": 4
         },
+
         "medley": {
-            "color": "#5421a6",
+            "color": "#5a319e",
+            "outline": "#0F1B2D",
             "sides": 3.2
         },
 
         "minor": {
-            "color": "#9797b3"
+            "color": "#49497a",
+            "outline": "#17172b"
         },
+
+        "tutorial": {
+            "color": "#6e6eb8",
+            "outline": "#28284a"
+        },
+
         "isolate": {
-            "color": "#9797b3"
+            "color": "#434E61",
+            "outline": "#0d1517"
         },
 
         "external": {
-            "color": "#9797b3"
+            "color": "#a18595",
+            "outline": "#57434e"
         }
     },
 
@@ -298,6 +311,7 @@
         "tutorial-synth": {
             "name": "Tutorial (Synth)",
             "subtitle": "2-1 SVT Beats",
+            "style": "tutorial",
             "embeds": {
                 "files": [
                 ]
@@ -307,6 +321,7 @@
         "tutorial-funk": {
             "name": "Tutorial (Funk)",
             "subtitle": "2-1N Skipshots",
+            "style": "tutorial",
             "embeds": {
                 "files": [
                 ]
@@ -316,6 +331,7 @@
         "tutorial-triplet": {
             "name": "Tutorial (Triplet)",
             "subtitle": "2-3 Swing Beats",
+            "style": "tutorial",
             "embeds": {
                 "files": [
                 ]
@@ -325,6 +341,7 @@
         "tutorial-milonga": {
             "name": "Tutorial (Milonga)",
             "subtitle": "5-3N 4 Beat Swing",
+            "style": "tutorial",
             "embeds": {
                 "files": [
                 ]
@@ -334,6 +351,7 @@
         "tutorial-syncopation": {
             "name": "Tutorial (Syncopation)",
             "subtitle": "6-1 Synco",
+            "style": "tutorial",
             "embeds": {
                 "files": [
                 ]
@@ -343,6 +361,7 @@
         "adofab": {
             "name": "A Dance Of Freeze & Burn",
             "subtitle": "Tutorial (House)",
+            "style": "tutorial",
             "embeds": {
                 "files": [
                 ]
@@ -352,6 +371,16 @@
         "rhythmstacker": {
             "name": "Rhythm Stacker",
             "subtitle": "Ian's Desktop",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "lonerunbeatable": {
+            "name": "Loner",
+            "subtitle": "Unbeatable OST",
+            "style": "external",
             "embeds": {
                 "files": [
                 ]
@@ -391,7 +420,8 @@
             "id": "1-2",
             "associations": [
                 "4-4N",
-                "6-1"
+                "6-1",
+                "lonerunbeatable"
             ]
         },
         "cole": {

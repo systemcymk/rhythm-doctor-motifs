@@ -4,6 +4,7 @@
 
 const layers = [...document.getElementById("canvas").children];
 const camera = new Camera(layers);
+const searchCamera = new Camera([document.getElementById("searchlayer")]);
 
 // For the UI + Search menu !!
 const sfxPagerIn = new Audio(rootDirectory + '/sfx/sndPagerOpen.ogg');
@@ -41,7 +42,7 @@ function refreshTree(newData) {
 
     // Handle ball creation.
     Object.entries(newData.tracks).forEach(([id, track]) => {
-        balls[id] = new node(id, track).setRenderInfo(camera);
+        balls[id] = new node(id, track).setRenderInfo(camera, searchCamera);
         balls[id].resetStyle();
 
         if (track.prefix) balls[id].prefix = track.prefix
@@ -54,7 +55,7 @@ function refreshTree(newData) {
         // Here we handle motif coalescing -
         // if a motif is primarily found in one track, then we consider the motif to be the track itself.
         const motifID = subdata.id ??= motif;
-        if (motifID == motif) balls[motifID] = new node(motifID, subdata).setRenderInfo(camera);
+        if (motifID == motif) balls[motifID] = new node(motifID, subdata).setRenderInfo(camera, searchCamera).resetStyle();
         if (subdata.prefix) balls[motifID].prefix = subdata.prefix
         if (subdata.subtitle) balls[motifID].subtitle = subdata.subtitle
         removeFrom(isolates, motifID);
@@ -91,18 +92,8 @@ function refreshTree(newData) {
         if (track.isMinor) balls[id].applyStyle("minor")
         if (track.style) balls[id].applyStyle(track.style)
     });
-}
 
-var ballInFocus;
-function setBallFocus(ball) {
-    if (ballInFocus) ballInFocus.inFocus = false;
-    ballInFocus = ball;
-
-    if (ballInFocus) {
-        ballInFocus.inFocus = true;
-        camera.focus.enabled = true;
-    } else 
-        camera.focus.enabled = false;
+    searchResults.push(...Object.values(balls));
 }
 
 FRICTION = 0.1
@@ -120,10 +111,6 @@ function draw(timestamp = 0) {
 
     // deltaTime *= 2;
     // console.log(deltaTime);
-
-    camera.layers[0].font = `${16 / camera.zoom}px rhythmdoctor`;
-    camera.layers[1].font = camera.layers[0].font;
-    camera.layers[2].font = camera.layers[0].font;
 
     // Process physics, draw edges
     Object.entries(balls).forEach(([id, ball]) => {
@@ -145,7 +132,7 @@ function draw(timestamp = 0) {
     });
 
     // Draw balls, apply physics
-    Object.entries(balls).forEach(([id,ball]) => {
+    Object.entries(balls).forEach(([id, ball]) => {
         ball.draw();
         if (id != draggedNode) {
             ball.applyMotion(deltaTime);
@@ -153,6 +140,13 @@ function draw(timestamp = 0) {
             ball.vx += ball.ax * 0.5 * deltaTime;
             ball.vy += ball.ay * 0.5 * deltaTime;
         }
+    });
+
+    // Draw balls in search menu
+    searchCamera.refresh();
+    searchCamera.scenes[0].style.height = `${searchResults.length * 69}px`
+    Object.entries(searchResults).forEach(([index, ball]) => {
+        ball.searchBall.draw(32, index * 69 + 36);
     });
 
     if (balls[draggedNode]) {
@@ -170,11 +164,7 @@ function draw(timestamp = 0) {
         }
     } 
 
-    if (ballInFocus?.onScreenEdge && isDragging && (ballInFocus.id != draggedNode)) {
-        sfxPagerOut.currentTime = 0;
-        sfxPagerOut.play();
-        setBallFocus(null);
-    }
+    if (ballInFocus?.shouldUnfocus && isDragging && (ballInFocus.id != draggedNode)) unfocusBall(searchIndex - 1);
 
     document.body.style.backgroundPositionX = `${-(camera.x - HALFGRID) / camera.zoom + camera.width * 0.5}px`;
     document.body.style.backgroundPositionY = `${-(camera.y - HALFGRID) / camera.zoom + camera.height * 0.5}px`;
@@ -183,48 +173,6 @@ function draw(timestamp = 0) {
     raf = window.requestAnimationFrame(draw);
     lastTime = timestamp;
 }
-
-const search = document.getElementById("search");
-const searchResults = [];
-let searchIndex = 0;
-search.addEventListener("keyup", ({key}) => {
-    if (key === "Enter") {
-        if (searchResults.length > 0) {
-            setBallFocus(searchResults[searchIndex]);
-            sfxPagerIn.currentTime = 0;
-            sfxPagerIn.play();
-            searchIndex = (searchIndex + 1) % searchResults.length;
-        } else {
-            setBallFocus(null);
-            sfxNope.currentTime = 0;
-            sfxNope.play();
-        }
-    }
-})
-
-search.addEventListener("input", () => {
-    searchIndex = 0;
-    if (ballInFocus) {
-        sfxPagerOut.currentTime = 0;
-        sfxPagerOut.play();
-        setBallFocus(null);
-    }
-
-    // the evil regex ever. ,,
-    // const regexStr = "[(" + search.value.replace(/[#-.]|[[-^]|[?|{}]/g, '\\$&').split(" ").join(")(") + ")]";
-
-    // significantly less evil, actually working regex. ,,,,
-    const regexStr = search.value.replace(/[#-.]|[[-^]|[?|{}]/g, '\\$&');
-    const regex = new RegExp(regexStr, "i");
-
-    searchResults.length = 0;
-    Object.entries(balls).forEach(([id, ball]) => {
-        if (ball.filter(regex)) searchResults.push(ball);
-    });
-
-    searchResults.sort((a, b) => a.matchString.localeCompare(b.matchString));
-    searchResults.sort((a, b) => b.matchPercent - a.matchPercent);
-})
 
 var isDragging = false
 var draggedNode = null
@@ -247,19 +195,19 @@ function dragStart(event, radius = 1.5) {
     draggedNode = null
     Object.entries(balls).forEach(([id,ball]) => {
         if (!ball.isEnabled) return;
-        let [screenx,screeny] = camera.toScreenCoords(ball.x, ball.y)
+        let [screenx,screeny] = camera.toScreenCoords(ball.x, ball.y);
         const dist = pythagoras(event.pageX - screenx, event.pageY - screeny - camera.getCanvasOffset());
         if (dist <= ball.radius / camera.zoom * radius + Math.max(0, camera.zoom * 4 - 4)) {
-            draggedNode = id
+            draggedNode = id;
         }
     });
     
-    if (draggedNode === null) [dragAnchor.x, dragAnchor.y] = [camera.x, camera.y]
-    else [dragAnchor.x, dragAnchor.y] = camera.toScreenCoords(balls[draggedNode].x, balls[draggedNode].y)
+    if (draggedNode === null) [dragAnchor.x, dragAnchor.y] = [camera.x, camera.y];
+    else [dragAnchor.x, dragAnchor.y] = camera.toScreenCoords(balls[draggedNode].x, balls[draggedNode].y);
 }
 
 canvas.onmousedown = dragStart
-canvas.ontouchstart = event => {
+canvas.addEventListener("touchstart", event => {
     event.preventDefault();
     if (event.touches.length == 1) {
         dragStart(event.touches[0], 5);
@@ -269,7 +217,7 @@ canvas.ontouchstart = event => {
         lastPinchPos.x2 = event.touches[1].pageX
         lastPinchPos.y2 = event.touches[1].pageY
     }
-}
+}, { passive : false });
 
 function dragMove(event) {
     cursor.x = event.pageX;
@@ -331,7 +279,7 @@ function touchMove(event) {
 }
 
 document.body.onmousemove = dragMove
-document.body.ontouchmove = touchMove
+document.body.addEventListener("touchmove", touchMove, { passive : false });
 
 function dragEnd(event) {
     isDragging = false
@@ -361,6 +309,89 @@ document.onwheel = event => {
     let [newx, newy] = camera.fromScreenCoords(event.pageX, event.pageY)
     camera.x += -newx+x
     camera.y += -newy+y
+}
+
+var ballInFocus;
+function setBallFocus(ball) {
+    if (ballInFocus) ballInFocus.inFocus = false;
+    ballInFocus = ball;
+
+    if (ballInFocus) {
+        ballInFocus.inFocus = true;
+        camera.focus.enabled = true;
+        ballInFocus.searchBall.camera.scenes[0].parentNode.scrollTop = (searchResults.indexOf(ballInFocus) - 3) * 69;
+    } else 
+        camera.focus.enabled = false;
+}
+
+function unfocusBall(newIndex = 0) {
+    searchIndex = newIndex % searchResults.length;
+    while (searchIndex < 0) searchIndex += searchResults.length;
+    sfxPagerOut.currentTime = 0;
+    sfxPagerOut.play();
+    setBallFocus(null);
+}
+
+const search = document.getElementById("search");
+const searchResults = [];
+let searchIndex = 0;
+search.addEventListener("keydown", ({key}) => {
+    if (key === "Enter") {
+        if (searchResults.length > 0) {
+            setBallFocus(searchResults[searchIndex]);
+            sfxPagerIn.currentTime = 0;
+            sfxPagerIn.play();
+            searchIndex = (searchIndex + 1) % searchResults.length;
+        } else {
+            setBallFocus(null);
+            sfxNope.currentTime = 0;
+            sfxNope.play();
+        }
+    }
+})
+
+search.addEventListener("input", () => {
+    if (ballInFocus) unfocusBall();
+
+    // the evil regex ever. ,,
+    // const regexStr = "[(" + search.value.replace(/[#-.]|[[-^]|[?|{}]/g, '\\$&').split(" ").join(")(") + ")]";
+
+    // significantly less evil, actually working regex. ,,,,
+    searchResults.length = 0;
+
+    if (search.value == '') {
+        searchResults.push(...Object.values(balls));
+        searchResults.sort((a, b) => a.matchString.localeCompare(b.matchString));
+    } else {
+        const regexStr = search.value.replace(/[#-.]|[[-^]|[?|{}]/g, '\\$&');
+        const regex = new RegExp(regexStr, "i");
+
+        Object.entries(balls).forEach(([id, ball]) => {
+            if (ball.filter(regex)) searchResults.push(ball);
+        });
+
+        searchResults.sort((a, b) => a.matchString.localeCompare(b.matchString));
+        searchResults.sort((a, b) => b.matchPercent - a.matchPercent);
+    }
+})
+
+searchCamera.scenes[0].onwheel = event => {
+    event.stopPropagation();
+}
+
+searchCamera.scenes[0].onmousedown = event => {
+    event.stopPropagation();
+    const ballIndex = Math.floor((event.pageY - searchCamera.scenes[0].getBoundingClientRect().top) / 69);
+    if (searchResults[ballIndex]) {
+        setBallFocus(searchResults[ballIndex]);
+        sfxPagerIn.currentTime = 0;
+        sfxPagerIn.play();
+        searchIndex = ballIndex + 1;
+    }
+}
+
+searchCamera.scenes[0].onmouseup = event => {
+    event.stopPropagation();
 }
 
 window.onload = draw;

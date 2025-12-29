@@ -27,6 +27,8 @@ body {
 .layer {
     position: absolute;
     pointer-events: none;
+    width: 100%;
+    height: 100%;
     top: 0px; left: 0px;
 }
 
@@ -36,7 +38,6 @@ body {
 
 #searchlayer {
     /* position: absolute; */
-    pointer-events: none;
     width: 100%;
     height: 100%;
     top: 0px; left: 0px;
@@ -76,9 +77,9 @@ body {
     animation-fill-mode: both;
 }
 
-.hud:focus-within #searchview {
+.hud:focus-within #searchview, #searchview:hover {
     right: 0px;
-    animation-name: slidetotheleft;
+    animation-name: slidetotheleft !important;
 }
 
 .hud {
@@ -88,7 +89,7 @@ body {
     bottom: 3em;
     right: 10px;
     height: 50%;
-    width: 12em;
+    width: 36em;
 }
 
 @font-face {
