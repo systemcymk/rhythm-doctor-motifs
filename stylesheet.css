@@ -51,17 +51,6 @@ body {
     right: 0px;
     bottom: 0px;
 }
-
-@keyframes slidetotheleft {
-    0% {right: -100%}
-    100% {right: 0px}
-}
-
-@keyframes slidetotheright {
-    0% {right: 0px}
-    100% {right: -100%}
-}
-
 #searchview {
     position: absolute;
     overflow-y: scroll;
@@ -72,14 +61,12 @@ body {
     width: 100%;
     right: -100%;
     bottom: 3em;
-    animation: 1s ease-in-out;
-    animation-name: slidetotheright;
-    animation-fill-mode: both;
+    padding-right: 3em;
+    transition: right ease-in-out 1s;
 }
 
-.hud:focus-within #searchview, #searchview:hover {
-    right: 0px;
-    animation-name: slidetotheleft !important;
+.hud:focus-within #searchview, #searchview:hover, #searchview:focus {
+    right: -1em;
 }
 
 .hud {
