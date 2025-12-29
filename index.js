@@ -116,6 +116,14 @@ function draw(timestamp = 0) {
     camera.refresh(deltaTime);
     [cursor.screenX, cursor.screenY] = camera.fromScreenCoords(cursor.x, cursor.y);
 
+    if (document.activeElement == document.body) {
+        if (movement.A) camera.x -= 20 * movement.A * deltaTime;
+        if (movement.D) camera.x += 20 * movement.D * deltaTime;
+
+        if (movement.W) camera.y -= 20 * movement.W * deltaTime;
+        if (movement.S) camera.y += 20 * movement.S * deltaTime;
+    }
+
     // deltaTime *= 2;
     // console.log(deltaTime);
 
@@ -155,14 +163,6 @@ function draw(timestamp = 0) {
     Object.entries(searchResults).forEach(([index, ball]) => {
         ball.searchBall.draw(32, index * 69 + 36);
     });
-
-    if (document.activeElement == document.body) {
-        if (movement.A) camera.x -= 20 * movement.A * deltaTime;
-        if (movement.D) camera.x += 20 * movement.D * deltaTime;
-
-        if (movement.W) camera.y -= 20 * movement.W * deltaTime;
-        if (movement.S) camera.y += 20 * movement.S * deltaTime;
-    }
 
     if (balls[draggedNode]) {
         const node = balls[draggedNode];
