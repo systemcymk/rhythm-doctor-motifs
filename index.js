@@ -349,7 +349,7 @@ function touchEnd(event) {
     if (event.touches.length >= 1)
         dragStart(event.touches[0], 5);
     else
-        dragEnd(event.touches[0]);
+        dragEnd(event.changedTouches[0]);
 }
 
 document.body.onmouseup = dragEnd
