@@ -5,6 +5,8 @@
 const layers = [...document.getElementById("canvas").children];
 const camera = new Camera(layers);
 const searchCamera = new Camera([document.getElementById("searchlayer")]);
+const searchLayer = searchCamera.scenes[0];
+const searchView = searchLayer.parentNode;
 
 // For the UI + Search menu !!
 const sfxPagerIn = new Audio(rootDirectory + '/sfx/sndPagerOpen.ogg');
@@ -159,7 +161,7 @@ function draw(timestamp = 0) {
 
     // Draw balls in search menu
     searchCamera.refresh();
-    searchCamera.scenes[0].style.height = `${searchResults.length * 69}px`
+    searchLayer.style.height = `${searchResults.length * 69}px`
     Object.entries(searchResults).forEach(([index, ball]) => {
         ball.searchBall.draw(32, index * 69 + 36);
     });
@@ -252,11 +254,12 @@ function clearTapTimer() {
 canvas.onmousedown = dragStart
 canvas.addEventListener("touchstart", event => {
     event.preventDefault();
+    searchView.blur();
 
     if (event.touches.length == 1) {
         if (tapTimer) {
             tapTimer = clearTapTimer();
-            select(event.touches[0]);
+            select(event.touches[0], 5);
         } else {
             tapTimer = setTimeout(clearTapTimer, 600);
             dragStart(event.touches[0], 5);
@@ -383,7 +386,6 @@ function setBallFocus(ball, sound = true) {
 
         const index = searchResults.indexOf(ballInFocus);
         if (index > -1) {
-            const searchView = searchCamera.scenes[0].parentNode;
             const bounding = searchView.getBoundingClientRect();
 
             const height = bounding.bottom - bounding.top - 69;
@@ -467,23 +469,20 @@ search.addEventListener("input", () => {
     }
 })
 
-searchCamera.scenes[0].addEventListener("touchstart", searchCamera.scenes[0].focus);
-searchCamera.scenes[0].parentNode.addEventListener("touchstart", searchCamera.scenes[0].parentNode.focus);
-
-searchCamera.scenes[0].onwheel = event => {
+searchLayer.onwheel = event => {
     event.stopPropagation();
 }
 
-searchCamera.scenes[0].onmousedown = event => {
+searchLayer.onmousedown = event => {
     event.stopPropagation();
-    const ballIndex = Math.floor((event.pageY - searchCamera.scenes[0].getBoundingClientRect().top) / 69);
+    const ballIndex = Math.floor((event.pageY - searchLayer.getBoundingClientRect().top) / 69);
     if (searchResults[ballIndex]) {
         setBallFocus(searchResults[ballIndex]);
         searchIndex = ballIndex + 1;
     }
 }
 
-searchCamera.scenes[0].onmouseup = event => {
+searchLayer.onmouseup = event => {
     event.stopPropagation();
 }
 
