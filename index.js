@@ -201,6 +201,7 @@ const lastPinchPos = {
 }
 
 function select(event, radius = 1.5) {
+    console.log('triggered');
     if (!Object.entries(balls).some(([id,ball]) => {
         if (!ball.isEnabled) return;
         let [screenx,screeny] = camera.toScreenCoords(ball.x, ball.y);
@@ -218,9 +219,11 @@ canvas.ondblclick = select
 function dragStart(event, radius = 1.5) {
     isDragging = true
     camera.focus.blocked = true;
-    document.body.style.cursor = "move"
+
     dragOffset.x = event.pageX
     dragOffset.y = event.pageY
+    cursor.x = event.pageX;
+    cursor.y = event.pageY;
     
     draggedNode = null
     Object.entries(balls).forEach(([id,ball]) => {
@@ -232,15 +235,36 @@ function dragStart(event, radius = 1.5) {
         }
     });
     
-    if (draggedNode === null) [dragAnchor.x, dragAnchor.y] = [camera.x, camera.y];
-    else [dragAnchor.x, dragAnchor.y] = camera.toScreenCoords(balls[draggedNode].x, balls[draggedNode].y);
+    if (draggedNode === null) {
+        [dragAnchor.x, dragAnchor.y] = [camera.x, camera.y];
+        document.body.style.cursor = "move"
+    } else {
+        [dragAnchor.x, dragAnchor.y] = camera.toScreenCoords(balls[draggedNode].x, balls[draggedNode].y);
+        document.body.style.cursor = "grabbing";
+    }
+}
+
+let tapTimer = null;
+function clearTapTimer() {
+    clearTimeout(tapTimer);
+    tapTimer = null;
 }
 
 canvas.onmousedown = dragStart
 canvas.addEventListener("touchstart", event => {
     event.preventDefault();
+
     if (event.touches.length == 1) {
-        dragStart(event.touches[0], 5);
+        if (tapTimer) {
+            console.log('tap twice');
+            tapTimer = clearTapTimer();
+            select(event.touches[0]);
+        } else {
+            console.log('tap once');
+            tapTimer = setTimeout(clearTapTimer, 600);
+            dragStart(event.touches[0], 5);
+        }
+
         lastPinchPos.x1 = event.touches[0].pageX
         lastPinchPos.y1 = event.touches[0].pageY
     } else if (event.touches.length == 2) {
@@ -270,6 +294,7 @@ function dragMove(event) {
 
 // What is this, chess?
 function touchMove(event) {
+    if (!isDragging) return;
     event.preventDefault();
 
     let swipingDrag = false;
@@ -316,13 +341,15 @@ function dragEnd(event) {
     camera.focus.blocked = false;
     draggedNode = null
     document.body.style.cursor = "auto"
+    cursor.x = event.pageX;
+    cursor.y = event.pageY;
 }
 
 function touchEnd(event) {
     if (event.touches.length >= 1)
         dragStart(event.touches[0], 5);
     else
-        dragEnd(event);
+        dragEnd(event.touches[0]);
 }
 
 document.body.onmouseup = dragEnd
@@ -448,7 +475,6 @@ searchCamera.scenes[0].onwheel = event => {
 }
 
 searchCamera.scenes[0].onmousedown = event => {
-    event.preventDefault();
     event.stopPropagation();
     const ballIndex = Math.floor((event.pageY - searchCamera.scenes[0].getBoundingClientRect().top) / 69);
     if (searchResults[ballIndex]) {

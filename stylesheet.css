@@ -38,6 +38,7 @@ body {
 
 #searchlayer {
     /* position: absolute; */
+    /* width: calc(100% - 256em); */
     width: 100%;
     height: 100%;
     top: 0px; left: 0px;
@@ -51,10 +52,12 @@ body {
     right: 0px;
     bottom: 0px;
 }
+
 #searchview {
     position: absolute;
     overflow-y: scroll;
     pointer-events: all;
+    touch-action: all;
     backdrop-filter: blur(10px);
     background-color: var(--BACKGROUND_COLOR);
     height: 100%;
@@ -66,7 +69,7 @@ body {
 }
 
 .hud:focus-within #searchview, #searchview:hover, #searchview:focus {
-    right: -1em;
+    right: 0px;
 }
 
 .hud {
