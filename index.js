@@ -201,7 +201,6 @@ const lastPinchPos = {
 }
 
 function select(event, radius = 1.5) {
-    console.log('triggered');
     if (!Object.entries(balls).some(([id,ball]) => {
         if (!ball.isEnabled) return;
         let [screenx,screeny] = camera.toScreenCoords(ball.x, ball.y);
@@ -256,11 +255,9 @@ canvas.addEventListener("touchstart", event => {
 
     if (event.touches.length == 1) {
         if (tapTimer) {
-            console.log('tap twice');
             tapTimer = clearTapTimer();
             select(event.touches[0]);
         } else {
-            console.log('tap once');
             tapTimer = setTimeout(clearTapTimer, 600);
             dragStart(event.touches[0], 5);
         }
@@ -469,6 +466,9 @@ search.addEventListener("input", () => {
         searchResults.sort((a, b) => b.matchPercent - a.matchPercent);
     }
 })
+
+searchCamera.scenes[0].addEventListener("touchstart", searchCamera.scenes[0].focus);
+searchCamera.scenes[0].parentNode.addEventListener("touchstart", searchCamera.scenes[0].parentNode.focus);
 
 searchCamera.scenes[0].onwheel = event => {
     event.stopPropagation();
