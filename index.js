@@ -15,6 +15,11 @@ const sfxNope = new Audio(rootDirectory + '/sfx/sndError.ogg');
 const sfxFocus = new Audio(rootDirectory + '/sfx/sndPagerCategory.ogg');
 const sfxExit = new Audio(rootDirectory + '/sfx/sndTransitionShort.ogg');
 
+// ui elements!
+const toggle = document.getElementById("toggle");
+const search = document.getElementById("search");
+const speed = document.getElementById("speed");
+
 var raf; // I'm not sure why this is being kept track of, but... ok!
 var cursor = {
     x: 0, y: 0,
@@ -98,8 +103,8 @@ function refreshTree(newData) {
 
     Object.entries(newData.tracks).forEach(([id, track]) => {
         if (balls[id].isIsolate) balls[id].applyStyle("isolate");
-        if (track.isMinor) balls[id].applyStyle("minor")
         if (track.style) balls[id].applyStyle(track.style)
+        else if (track.isMinor) balls[id].applyStyle("minor")
     });
 
     searchResults.push(...Object.values(balls));
@@ -125,6 +130,10 @@ function draw(timestamp = 0) {
         if (movement.W) camera.y -= 20 * movement.W * deltaTime;
         if (movement.S) camera.y += 20 * movement.S * deltaTime;
     }
+
+    if (speed.value < -4.4) speed.value = -4.4;
+    else if (speed.value > 4.4) speed.value = 4.4;
+    deltaTime = speed.value;
 
     // deltaTime *= 2;
     // console.log(deltaTime);
@@ -228,7 +237,7 @@ function dragStart(event, radius = 1.5) {
     
     draggedNode = null
     Object.entries(balls).forEach(([id,ball]) => {
-        if (!ball.isEnabled) return;
+        if (!ball.isEnabled && ball != ballInFocus) return;
         let [screenx,screeny] = camera.toScreenCoords(ball.x, ball.y);
         const dist = pythagoras(event.pageX - screenx, event.pageY - screeny - camera.getCanvasOffset());
         if (dist <= ball.radius / camera.zoom * radius + Math.max(0, camera.zoom * 4 - 4)) {
@@ -416,7 +425,6 @@ function unfocusBall(newIndex = 0) {
     setBallFocus(null);
 }
 
-const search = document.getElementById("search");
 const searchResults = [];
 let searchIndex = 0;
 
@@ -467,6 +475,11 @@ search.addEventListener("input", () => {
         searchResults.sort((a, b) => a.matchString.localeCompare(b.matchString));
         searchResults.sort((a, b) => b.matchPercent - a.matchPercent);
     }
+})
+
+toggle.addEventListener("click", () => {
+    console.log("nya");
+    if (ballInFocus) ballInFocus.isEnabled = !ballInFocus.isEnabled;
 })
 
 searchLayer.onwheel = event => {

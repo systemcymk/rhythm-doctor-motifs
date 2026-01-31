@@ -166,6 +166,28 @@
         "X-1": "Art Exercise",
         "X-0": "Helping Hands",
 
+        "1-IN_Edega": {
+            "name": "Edega",
+            "subtitle": "(Cello)",
+            "file": "sndEdegaCello",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "1-IN_Insomniac": {
+            "name": "Insomniac",
+            "subtitle": "(Battleworn Insomniac)",
+            "file": "sndInsomniacCutscene",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
         "2-IN": {
             "name": "Puff Piece",
             "subtitle": "(Intermission)",
@@ -206,43 +228,19 @@
             }
         },
 
-        "7-IN": {
-            "name": "Blurred",
-            "subtitle": "(Intermission)",
-            "isMinor": true,
-            "embeds": {
-                "files": [
-                ]
-            }
-        },
-
-        "7-IN_OSM-Paige": {
-            "name": "One Shift More",
-            "subtitle": "(Paige Returns)",
-            "isMinor": true,
-            "embeds": {
-                "files": [
-                ]
-            }
-        },
-
-        "7-IN_OSM-Edega": {
-            "name": "One Shift More",
-            "subtitle": "(Edega's Bedside)",
-            "isMinor": true,
-            "embeds": {
-                "files": [
-                ]
-            },
-            "leitmotifs": {
-                "7-X2": []
-            }
-        },
-
         "5-IN": {
             "name": "Fortunate Rest",
             "subtitle": "(Lucky Break Arrangement)",
             "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "5-IN_Edega": {
+            "name": "Boss Music",
+            "subtitle": "Edega",
             "embeds": {
                 "files": [
                 ]
@@ -282,12 +280,69 @@
             }
         },
 
-        "5-IN_Edega": {
-            "name": "Boss Music",
-            "subtitle": "Edega",
+        "6-CHOICE": {
+            "name": "Boss Fight",
+            "subtitle": "(Paige's Reckoning)",
+            "leitmotifs": {
+                "1-IN_Edega": [],
+                "6-X": []
+            },
+            "isMinor": true,
             "embeds": {
                 "files": [
                 ]
+            }
+        },
+
+        "7-IN": {
+            "name": "Blurred",
+            "subtitle": "(Intermission)",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "7-IN_OSM-Paige": {
+            "name": "One Shift More",
+            "subtitle": "(Paige Returns)",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "7-IN_CodeBlue": {
+            "name": "Code Blue",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "7-IN_MontageIntro": {
+            "name": "Montage Intro",
+            "subtitle": "Miracle Defibrillator Intro",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "7-IN_OSM-Edega": {
+            "name": "One Shift More",
+            "subtitle": "(Edega's Bedside)",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            },
+            "leitmotifs": {
+                "7-X2": []
             }
         },
 
@@ -377,10 +432,98 @@
             }
         },
 
+        "X-MAT": {
+            "name": "Meet and Tweet",
+            "subtitle": "Bits & Bops OST",
+            "style": "external",
+            "prefix": "X-MAT",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "X-WOT": {
+            "name": "Worn Out Tapes",
+            "subtitle": "Unbeatable OST",
+            "style": "external",
+            "prefix": "X-WOT",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
         "lonerunbeatable": {
             "name": "Loner",
             "subtitle": "Unbeatable OST",
             "style": "external",
+            "isMinor": true,
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "X-KOB": {
+            "name": "Kingdom of Balloons",
+            "subtitle": "Circle of Sparks OST",
+            "style": "external",
+            "prefix": "X-KOB",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "X-FTS": {
+            "name": "Fixations Toward the Stars",
+            "subtitle": "vivid/stasis OST",
+            "style": "external",
+            "prefix": "X-FTS",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "tutorial-dubstep": {
+            "name": "Tutorial (Dubstep)",
+            "subtitle": "MD-1 Squareshots",
+            "style": "tutorial",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "MD-1": {
+            "name": "Blackest Luxury Car",
+            "subtitle": "Muse Dash OST",
+            "style": "external",
+            "prefix": "MD-1",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "MD-2": {
+            "name": "tape/stop/night",
+            "subtitle": "Muse Dash OST",
+            "style": "external",
+            "prefix": "MD-2",
+            "embeds": {
+                "files": [
+                ]
+            }
+        },
+
+        "MD-3": {
+            "name": "The 90's Decision",
+            "subtitle": "Muse Dash OST",
+            "style": "external",
+            "prefix": "MD-3",
             "embeds": {
                 "files": [
                 ]
@@ -404,7 +547,8 @@
                 "tutorial-milonga",
                 "tutorial-syncopation",
                 "adofab",
-                "2-B1"
+                "2-B1",
+                "tutorial-dubstep"
             ]
         },
         "samurai": {
@@ -412,7 +556,6 @@
             "associations": [
                 "1-1N",
                 "1-X",
-                "1-XN",
                 "4-4N"
             ]
         },
@@ -422,6 +565,14 @@
                 "4-4N",
                 "6-1",
                 "lonerunbeatable"
+            ]
+        },
+        "insomniac": {
+            "id": "1-X",
+            "associations": [
+                "1-X",
+                "1-XN",
+                "1-IN_Insomniac"
             ]
         },
         "cole": {
@@ -492,11 +643,21 @@
                 "5-IN"
             ]
         },
+        "dreamsdontstop": {
+            "id": "5-X",
+            "associations": [
+                "5-IN_DDS-Piano",
+                "5-IN_DDS-Edega",
+                "5-IN_DDS-Virus"
+            ]
+        },
         "edega": {
             "id": "5-IN_Edega",
             "associations": [
+                "1-IN_Edega",
                 "5-IN_DDS-Edega",
                 "6-X",
+                "6-CHOICE",
                 "7-1"
             ]
         },
@@ -504,14 +665,6 @@
             "id": "7-1",
             "associations": [
                 "7-IN"
-            ]
-        },
-        "dreamsdontstop": {
-            "id": "5-X",
-            "associations": [
-                "5-IN_DDS-Piano",
-                "5-IN_DDS-Edega",
-                "5-IN_DDS-Virus"
             ]
         },
         "bomb": {

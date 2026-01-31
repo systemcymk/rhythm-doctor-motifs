@@ -298,7 +298,11 @@ class node {
         const matched = this.matchPercent > 0;
 
         // Prioritize non-minor tracks.
-        if (this.data?.isMinor) this.matchPercent--;
+        if (this.data?.isMinor) {
+            this.matchPercent--;
+            if (this.style == "external") this.matchPercent--;
+        }
+
         return matched;
     }
 
@@ -306,7 +310,7 @@ class node {
     // Else, this is handled by interact(), for minor performance reasons.
     drawEdges() {
         Object.entries(this.motifs).forEach(([_, ball]) => {
-            this.drawEdge(ball, 1, 2);
+            if (ball.isEnabled) this.drawEdge(ball, 1, 2);
         });
     }
 
@@ -408,7 +412,10 @@ class searchnode {
 
     draw(x, y) {
         this.sx = x; this.sy = y;
+        if (!this.ball.isEnabled) this.ctx.globalAlpha = 0.25;
+        
         node.drawGeneric(this);
+        this.ctx.globalAlpha = 1;
 
         const xpos = this.sx + 36;
         const ypos = this.ball.subtitle ? this.sy - 3 : this.sy + 4;
