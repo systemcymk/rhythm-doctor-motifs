@@ -270,6 +270,25 @@ function drawEdge(x1,y1,x2,y2,a) {
     ctx.globalAlpha = 1;
 }
 
+function drawEdgeDir(x1,y1,x2,y2,a,r,r1,spread) {
+    ctx.strokeStyle = "#aaaacc";
+    ctx.fillStyle = "#aaaacc";
+    ctx.globalAlpha = a;
+    ctx.beginPath();
+    ctx.moveTo(...toScreenCoords(x1,y1));
+    ctx.lineTo(...toScreenCoords(x2,y2));
+    ctx.stroke();
+    let t = Math.atan2(y2-y1,x2-x1)
+    ctx.beginPath();
+    ctx.moveTo(...toScreenCoords(x2-r1*Math.cos(t),y2-r1*Math.sin(t)));
+    ctx.lineTo(...toScreenCoords(x2-r1*Math.cos(t)+r*Math.cos(t+spread*PI/4),y2-r1*Math.sin(t)+r*Math.sin(t+spread*PI/4)));
+    ctx.lineTo(...toScreenCoords(x2-r1*Math.cos(t)+r*Math.cos(t-spread*PI/4),y2-r1*Math.sin(t)+r*Math.sin(t-spread*PI/4)));
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+}
+
 var cursor = {
     x: 0, y: 0,
     screenX: 0, screenY: 0
